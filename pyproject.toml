@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "c4service"
+version = "0.1.0"
+description = ""
+authors = ["jasonxie <jasonxie@ntub.edu.tw>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+torch = {version = "^1.13.1+cu117", source = "pytorch"}
+transformers = "^4.25.1"
+pytorch-lightning = "^1.8.6"
+gradio = "^3.16.1"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.12.0"
+isort = "^5.11.3"
+ipython = "^8.7.0"
+
+
+[[tool.poetry.source]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu117"
+default = false
+secondary = true
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
