@@ -5,6 +5,7 @@ import gradio as gr
 from gradio.components import Component
 
 from c4service.service import ModelService
+from c4service.preprocess.py_lang import clear_source
 
 
 
@@ -17,13 +18,11 @@ class MainInterface:
 
     def make_similarity_inputs(self) -> List[Component]:
         source_code = gr.Textbox(
-            "print('Hello World.')",
             lines=5,
             max_lines=50,
             label="Source Code",
         )
         target_code = gr.Textbox(
-            "print('hello world.')",
             lines=5,
             max_lines=50,
             label="Target Code",
@@ -44,6 +43,8 @@ class MainInterface:
         source_code: str,
         target_code: str,
     ) -> Tuple[Dict[str, Union[str, float]], List[float], List[float]]:
+        source_code = clear_source(source_code)
+        target_code = clear_source(target_code)
         score, vec1, vec2 = self.service.predict(source_code, target_code, True)
         return {"Similarity": score}, vec1, vec2
     
@@ -51,6 +52,7 @@ class MainInterface:
         self,
         source_code: str,
     ) -> List[float]:
+        source_code = clear_source(source_code)
         vec = self.service.predict_vector(source_code)
         return vec
 
@@ -68,19 +70,19 @@ class MainInterface:
                 inputs=inputs,
                 outputs=outputs,
                 api_name="similarity",
-            )
-            similarity_view.load(
-                self.similarity,
-                inputs=inputs,
-                outputs=outputs,
-                api_name="similarity",
                 scroll_to_output=True,
+            )
+            gr.Examples(
+                [["print('Hello World.')", "print('Hello World.')"]],
+                inputs,
+                outputs,
+                self.similarity,
+                cache_examples=True,
             )
             
         with gr.Blocks() as vector_view:
             gr.Markdown("## C4 Model Code Vector")
             source_input = gr.Textbox(
-                "print('Hello World.')",
                 lines=5,
                 max_lines=50,
                 label="Source Code",
@@ -88,12 +90,6 @@ class MainInterface:
             vec_btn = gr.Button("Run")
             source_output = gr.JSON(label="Source Code Vector")
             vec_btn.click(
-                fn=self.vector,
-                inputs=source_input,
-                outputs=source_output,
-                api_name="vector",
-            )
-            vector_view.load(
                 fn=self.vector,
                 inputs=source_input,
                 outputs=source_output,
